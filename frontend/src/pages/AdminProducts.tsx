@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { PRODUCT_CATEGORIES, DEFAULT_CATEGORY } from '../lib/categories'
 import type { Product } from '../types'
+
+const EMPTY_FORM = {
+  name: '',
+  description: '',
+  price: '',
+  image_url: '',
+  category: DEFAULT_CATEGORY,
+}
 
 const AdminProducts = () => {
   const { user } = useAuth()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ name: '', description: '', price: '', image_url: '' })
+  const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const fetchProducts = async () => {
@@ -30,11 +39,12 @@ const AdminProducts = () => {
           description: form.description || null,
           price: parseFloat(form.price),
           image_url: form.image_url || null,
+          category: form.category,
         })
         .eq('id', editingId)
       if (!error) {
         setEditingId(null)
-        setForm({ name: '', description: '', price: '', image_url: '' })
+        setForm(EMPTY_FORM)
         fetchProducts()
       }
     } else {
@@ -43,10 +53,11 @@ const AdminProducts = () => {
         description: form.description || null,
         price: parseFloat(form.price),
         image_url: form.image_url || null,
+        category: form.category,
         created_by: user?.id,
       })
       if (!error) {
-        setForm({ name: '', description: '', price: '', image_url: '' })
+        setForm(EMPTY_FORM)
         fetchProducts()
       }
     }
@@ -59,6 +70,7 @@ const AdminProducts = () => {
       description: product.description || '',
       price: product.price.toString(),
       image_url: product.image_url || '',
+      category: product.category || DEFAULT_CATEGORY,
     })
   }
 
@@ -71,7 +83,7 @@ const AdminProducts = () => {
 
   const cancelEdit = () => {
     setEditingId(null)
-    setForm({ name: '', description: '', price: '', image_url: '' })
+    setForm(EMPTY_FORM)
   }
 
   if (loading) return <div style={{ padding: 20 }}>Cargando...</div>
@@ -106,6 +118,17 @@ const AdminProducts = () => {
             value={form.image_url}
             onChange={(e) => setForm({ ...form, image_url: e.target.value })}
           />
+          <label style={{ display: 'grid', gap: 4 }}>
+            <span>Categoría</span>
+            <select
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            >
+              {PRODUCT_CATEGORIES.map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </label>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="submit">{editingId ? 'Actualizar' : 'Crear'}</button>
             {editingId && <button type="button" onClick={cancelEdit}>Cancelar</button>}
@@ -118,6 +141,7 @@ const AdminProducts = () => {
         <thead>
           <tr style={{ background: '#f0f0f0' }}>
             <th style={{ padding: 10, textAlign: 'left' }}>Nombre</th>
+            <th style={{ padding: 10, textAlign: 'left' }}>Categoría</th>
             <th style={{ padding: 10, textAlign: 'left' }}>Precio</th>
             <th style={{ padding: 10, textAlign: 'left' }}>Descripción</th>
             <th style={{ padding: 10, textAlign: 'left' }}>Acciones</th>
@@ -127,6 +151,7 @@ const AdminProducts = () => {
           {products.map((product) => (
             <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
               <td style={{ padding: 10 }}>{product.name}</td>
+              <td style={{ padding: 10 }}>{product.category || '-'}</td>
               <td style={{ padding: 10 }}>${product.price}</td>
               <td style={{ padding: 10 }}>{product.description}</td>
               <td style={{ padding: 10, display: 'flex', gap: 10 }}>

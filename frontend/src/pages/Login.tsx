@@ -14,13 +14,17 @@ const Login = () => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await signIn(email, password)
+    const { error, profile: signedProfile } = await signIn(email, password)
     setLoading(false)
     if (error) {
       setError(error.message)
       return
     }
-    navigate('/')
+    if (!signedProfile) {
+      setError('Tu usuario no tiene perfil asignado. Pedile al administrador que te asigne un rol.')
+      return
+    }
+    navigate(signedProfile.role === 'admin' ? '/admin/products' : '/shop', { replace: true })
   }
 
   return (

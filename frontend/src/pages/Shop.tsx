@@ -5,12 +5,28 @@ import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import type { Product } from '../types'
 
+const ALL_CATEGORIES = 'all'
+
 const Shop = () => {
   const { user } = useAuth()
   const { showToast } = useToast()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState<{[key: string]: number}>({})
+  const [category, setCategory] = useState(ALL_CATEGORIES)
+
+  const categories = Array.from(
+    new Set(
+      products
+        .map((product) => product.category)
+        .filter((value): value is string => Boolean(value))
+    )
+  )
+
+  const visibleProducts =
+    category === ALL_CATEGORIES
+      ? products
+      : products.filter((product) => product.category === category)
 
   const fetchProducts = async () => {
     const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false })
@@ -95,10 +111,29 @@ const Shop = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 30 }}>
         <div>
           <h3>Productos</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 15 }}>
+            <label htmlFor="category-filter">Categoría:</label>
+            <select
+              id="category-filter"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{ padding: 6 }}
+            >
+              <option value={ALL_CATEGORIES}>Todas</option>
+              {categories.map((value) => (
+                <option key={value} value={value}>{value}</option>
+              ))}
+            </select>
+            <span style={{ color: '#666' }}>
+              {visibleProducts.length} producto{visibleProducts.length === 1 ? '' : 's'}
+            </span>
+          </div>
+          {visibleProducts.length === 0 && <p>No hay productos en esta categoría.</p>}
           <div style={{ display: 'grid', gap: 15 }}>
-            {products.map((product) => (
+            {visibleProducts.map((product) => (
               <div key={product.id} style={{ border: '1px solid #ddd', padding: 15, borderRadius: 8 }}>
                 <h4>{product.name}</h4>
+                {product.category && <small style={{ color: '#666' }}>{product.category}</small>}
                 <p>{product.description}</p>
                 <p><strong>${product.price}</strong></p>
                 <div style={{ display: 'flex', gap: 10 }}>

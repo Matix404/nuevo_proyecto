@@ -13,6 +13,7 @@ export interface Product {
   description: string | null
   price: number
   image_url: string | null
+  category: string | null
   created_by: string | null
   created_at: string
 }

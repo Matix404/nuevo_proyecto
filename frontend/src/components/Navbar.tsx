@@ -9,7 +9,7 @@ const Navbar = () => {
       <Link to="/">Inicio</Link>
       {session ? (
         <>
-          <Link to="/profile">Mi perfil ({profile?.role})</Link>
+          <Link to="/profile">Mi perfil ({profile?.role || 'sin rol'})</Link>
           {profile?.role === 'admin' && <Link to="/admin/products">Gestionar productos</Link>}
           {profile?.role === 'cliente' && <Link to="/shop">Tienda</Link>}
           {profile?.role === 'cliente' && <Link to="/orders">Mis órdenes</Link>}

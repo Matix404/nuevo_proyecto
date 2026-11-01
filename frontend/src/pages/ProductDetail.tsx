@@ -50,6 +50,7 @@ const ProductDetail = () => {
   return (
     <div style={{ maxWidth: 800, margin: '20px auto', padding: 20 }}>
       <h2>{product.name}</h2>
+      {product.category && <p><small>Categoría: {product.category}</small></p>}
       <p>{product.description}</p>
       <p><strong>${product.price}</strong></p>
 
