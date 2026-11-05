@@ -98,6 +98,7 @@ La compra pasa por una sola función: `supabase.rpc('create_order', { items })`.
 ### Tests de base de datos
 
 ```bash
+npm install      # en la raíz: instala @electric-sql/pglite
 npm run test:db
 ```
 

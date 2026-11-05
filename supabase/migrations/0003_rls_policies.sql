@@ -42,8 +42,11 @@ revoke all on public.profiles, public.products, public.orders, public.order_item
 
 grant select on public.profiles to authenticated;
 grant select, insert, update, delete on public.products to authenticated;
-grant select, insert on public.orders to authenticated;
-grant select, insert on public.order_items to authenticated;
+-- orders/order_items son solo lectura directa: la única escritura es la RPC
+-- create_order (0004). Si acá se otorgara INSERT, la RPC sería opcional y el
+-- cliente podría volver a mandar su propio total.
+grant select on public.orders to authenticated;
+grant select on public.order_items to authenticated;
 grant select, insert on public.reviews to authenticated;
 
 -- profiles: cada uno ve solo el suyo. Escribir perfiles es tarea del dashboard
@@ -81,10 +84,10 @@ create policy orders_select_own on public.orders
   for select to authenticated
   using (user_id = (select auth.uid()));
 
+-- La escritura de órdenes es exclusivamente la RPC create_order (0004). Se
+-- eliminan acá para que re-aplicar 0003 no reabra el bypass del insert directo.
 drop policy if exists orders_insert_own on public.orders;
-create policy orders_insert_own on public.orders
-  for insert to authenticated
-  with check (user_id = (select auth.uid()) and status = 'pending');
+drop policy if exists order_items_insert_own on public.order_items;
 
 -- order_items: solo de órdenes propias.
 drop policy if exists order_items_select_own on public.order_items;
@@ -99,15 +102,6 @@ create policy order_items_select_own on public.order_items
   );
 
 drop policy if exists order_items_insert_own on public.order_items;
-create policy order_items_insert_own on public.order_items
-  for insert to authenticated
-  with check (
-    exists (
-      select 1 from public.orders o
-      where o.id = order_items.order_id
-        and o.user_id = (select auth.uid())
-    )
-  );
 
 -- reviews: lectura pública para logueados, escritura solo a nombre propio.
 drop policy if exists reviews_select_authenticated on public.reviews;

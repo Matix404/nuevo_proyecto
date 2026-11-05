@@ -28,13 +28,15 @@ begin
     raise exception 'create_order: carrito vacío o inválido' using errcode = '22023';
   end if;
 
-  -- Forma del payload antes de castear nada.
+  -- Forma del payload antes de castear nada. jsonb_typeof evita el agujero de
+  -- (e ->> 'k') !~ regex: con JSON null el operador devuelve NULL y el EXISTS
+  -- no matchea, salteando la validación.
   if exists (
     select 1
     from jsonb_array_elements(items) e
     where jsonb_typeof(e) <> 'object'
-       or not (e ? 'product_id')
-       or not (e ? 'quantity')
+       or jsonb_typeof(e -> 'product_id') is distinct from 'string'
+       or jsonb_typeof(e -> 'quantity') is distinct from 'number'
        or (e ->> 'product_id') !~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
        or (e ->> 'quantity') !~ '^[0-9]{1,4}$'
        or (e ->> 'quantity')::int < 1
