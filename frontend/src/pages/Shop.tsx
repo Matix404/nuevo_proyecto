@@ -132,13 +132,25 @@ const Shop = () => {
           <div style={{ display: 'grid', gap: 15 }}>
             {visibleProducts.map((product) => (
               <div key={product.id} style={{ border: '1px solid #ddd', padding: 15, borderRadius: 8 }}>
+                {product.image_url && (
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    style={{ width: '100%', maxHeight: 160, objectFit: 'cover', borderRadius: 6, marginBottom: 10, display: 'block' }}
+                  />
+                )}
                 <h4>{product.name}</h4>
                 {product.category && <small style={{ color: '#666' }}>{product.category}</small>}
                 <p>{product.description}</p>
                 <p><strong>${product.price}</strong></p>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <button onClick={() => addToCart(product.id)}>Agregar al carrito</button>
-                  <Link to={`/product/${product.id}`}><button>Ver reseñas</button></Link>
+                  <Link
+                    to={`/product/${product.id}`}
+                    style={{ padding: '2px 8px', border: '1px solid #767676', borderRadius: 2, background: '#efefef', color: 'inherit', textDecoration: 'none', fontSize: 13 }}
+                  >
+                    Ver reseñas
+                  </Link>
                 </div>
               </div>
             ))}

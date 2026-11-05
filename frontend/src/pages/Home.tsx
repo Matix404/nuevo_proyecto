@@ -4,18 +4,8 @@ import { Link } from 'react-router-dom'
 const Home = () => {
   const { session, profile, signOut } = useAuth()
 
-  if (!session) {
-    return (
-      <div style={{ maxWidth: 800, margin: '40px auto', padding: 20, textAlign: 'center' }}>
-        <h1>Bienvenido</h1>
-        <p>No has iniciado sesión</p>
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20 }}>
-          <Link to="/login">Iniciar sesión</Link>
-          <Link to="/register">Registrarse</Link>
-        </div>
-      </div>
-    )
-  }
+  // "/" vive dentro de ProtectedRoute: sin sesión nunca se llega acá.
+  if (!session) return null
 
   const isAdmin = profile?.role === 'admin'
   const isCliente = profile?.role === 'cliente'

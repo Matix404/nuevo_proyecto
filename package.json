@@ -1,6 +1,13 @@
 {
-  "dependencies": {
-    "@supabase/supabase-js": "^2.118.0",
-    "react-router-dom": "^7.18.5"
+  "name": "nuevo-proyecto",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Root launcher: the app lives in ./frontend",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "preview": "npm --prefix frontend run preview",
+    "setup": "npm --prefix frontend install"
   }
 }

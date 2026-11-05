@@ -21,9 +21,12 @@ Proyecto creado con **Vite + React + TypeScript + Supabase** siguiendo metodolog
 - ✅ Rutas protegidas por autenticación y rol
 
 ## Usuarios de prueba
-Ya creados en Supabase:
-- **Admin:** `admin@demo.com` / `Admin1234!` - Puede gestionar productos
-- **Cliente:** `cliente@demo.com` / `Cliente1234!` - Puede comprar y dejar reseñas
+Crealos desde Supabase (Authentication → Users) y después asignales el rol en `profiles`:
+
+- Un usuario con `role = 'admin'` para gestionar productos.
+- Un usuario con `role = 'cliente'` para comprar y dejar reseñas.
+
+Las credenciales no se versionan en el repositorio.
 
 ## Instalación y ejecución
 
@@ -47,6 +50,19 @@ npm run dev
 
 La app estará en `http://localhost:5173`
 
+### Atajos desde la raíz
+
+El `package.json` de la raíz no tiene dependencias propias: solo delega al frontend.
+
+```bash
+npm run setup    # instala dependencias de frontend/
+npm run dev
+npm run build
+npm run lint
+```
+
+Los flags extra (`npm run dev -- --port 5174`) no atraviesan las dos capas de npm; en ese caso corré el script desde `frontend/`.
+
 ## Estructura del proyecto
 ```
 frontend/src/
@@ -59,14 +75,26 @@ frontend/src/
 ```
 
 ## Base de datos Supabase
-El esquema incluye:
-- `profiles` - Perfiles de usuario con rol
-- `products` - Productos (solo admin crea/edita/elimina)
-- `orders` - Órdenes de compra
-- `order_items` - Items de cada orden
-- `reviews` - Reseñas de productos
+El esquema está versionado en `supabase/migrations/`:
 
-Todo con **Row Level Security (RLS)** habilitado.
+| Archivo | Contenido |
+|---|---|
+| `0001_core_schema.sql` | Tablas `profiles`, `products`, `orders`, `order_items`, `reviews` + constraints e índices |
+| `0002_products_category.sql` | Columna `products.category` + índice |
+| `0003_rls_policies.sql` | Policies por rol + `is_admin()` + grants |
+
+Para aplicar (no hay Supabase CLI linkeado): copiá cada archivo en orden en **Supabase → SQL Editor** y ejecutalo.
+
+RLS está habilitado en las 5 tablas y `0003` cubre lo que la app hace hoy:
+
+- **`anon`**: sin acceso a ninguna tabla (toda la app está detrás de login).
+- **cliente**: lee el catálogo completo, crea solo sus órdenes (siempre `pending`), agrega items solo a órdenes propias, deja una reseña por producto y no puede reescribirla.
+- **admin**: todo lo anterior + crear/editar/eliminar productos, vía `public.is_admin()`.
+- **`profiles`**: cada uno lee solo el suyo. Nadie puede escribir la tabla desde la app, así que nadie puede auto-asignarse `admin`; los roles se asignan desde el dashboard.
+
+Pendiente de la Parte 4: `orders.total` y `order_items.price` todavía los manda el cliente. La RPC transaccional es lo que cierra ese agujero.
+
+`0001_core_schema.sql` es un baseline de instalación limpia derivado del uso que hace el código, no un dump de producción. Reconciliá con tu base real antes de aplicarlo sobre datos existentes.
 
 ## Seguimiento ODD
 Ver `odd/tasks/app-auth-supabase.md` para el seguimiento completo del feature.

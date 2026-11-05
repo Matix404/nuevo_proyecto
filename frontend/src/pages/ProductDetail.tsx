@@ -50,6 +50,13 @@ const ProductDetail = () => {
   return (
     <div style={{ maxWidth: 800, margin: '20px auto', padding: 20 }}>
       <h2>{product.name}</h2>
+      {product.image_url && (
+        <img
+          src={product.image_url}
+          alt={product.name}
+          style={{ width: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 8, marginBottom: 15, display: 'block' }}
+        />
+      )}
       {product.category && <p><small>Categoría: {product.category}</small></p>}
       <p>{product.description}</p>
       <p><strong>${product.price}</strong></p>

@@ -17,6 +17,7 @@ S6: "admin crea productos y pone precio" - Panel/admin para crear productos (nom
 S7: "y cliente compra productos, se logea, deja resenas" - Cliente autenticado puede comprar (carrito/orden simple) y dejar reseñas por producto.
 S8: "crear nuevo proyecto de superbase, nueva conexion" - Crear proyecto en Supabase, obtener URL/anon key, configurar .env. Documentar pasos.
 S9: "dame los paso para hacerlo y emaneja todo con ODD antes que ser SDD" - Seguir ODD, generar pasos accionables.
+S10: "en la seccion de la tienda no tiene como decirlo la categoria de seleccion para comprar" - Los productos tienen categoría y la tienda permite filtrar por categoría antes de comprar.
 
 ## Tasks
 
@@ -27,6 +28,7 @@ T4 | S5 | route: inline | status: done | commit: -
 T5 | S6 | route: inline | status: done | commit: -
 T6 | S7 | route: inline | status: done | commit: -
 T7 | S9 | route: inline | status: done | commit: - (documentación/plan final)
+T8 | S10 | route: inline | status: blocked (falta correr SQL de migración) | commit: -
 
 ## Log
 
