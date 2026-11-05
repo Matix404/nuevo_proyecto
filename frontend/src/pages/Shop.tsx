@@ -69,33 +69,17 @@ const Shop = () => {
       showToast('Usuario no autenticado', 'error')
       return
     }
-    const total = getTotal()
-    
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({ user_id: user?.id, total, status: 'pending' })
-      .select()
-      .single()
 
-    if (orderError || !order) {
-      showToast('Error al crear orden', 'error')
-      return
-    }
+    const items = Object.entries(cart).map(([productId, quantity]) => ({
+      product_id: productId,
+      quantity,
+    }))
 
-    const orderItems = Object.entries(cart).map(([productId, quantity]) => {
-      const product = products.find(p => p.id === productId)
-      return {
-        order_id: order.id,
-        product_id: productId,
-        quantity,
-        price: product?.price || 0
-      }
-    })
+    // Precios y total los calcula la RPC en el servidor: acá no se manda plata.
+    const { error } = await supabase.rpc('create_order', { items })
 
-    const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
-
-    if (itemsError) {
-      showToast('Error al agregar items', 'error')
+    if (error) {
+      showToast('No se pudo completar la compra', 'error')
       return
     }
 

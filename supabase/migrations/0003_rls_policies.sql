@@ -29,10 +29,16 @@ as $$
 $$;
 
 revoke all on function public.is_admin() from public;
+revoke execute on function public.is_admin() from anon;
 grant execute on function public.is_admin() to authenticated;
 
 -- Sin acceso anónimo, aunque falte una policy o cambien los grants por defecto.
 revoke all on public.profiles, public.products, public.orders, public.order_items, public.reviews from anon;
+
+-- Supabase otorga ALL por defecto a authenticated. Sin este revoke quedan
+-- TRUNCATE / REFERENCES / TRIGGER (TRUNCATE no pasa por RLS) y UPDATE/DELETE
+-- que ninguna policy autoriza. Los grants mínimos vuelven justo abajo.
+revoke all on public.profiles, public.products, public.orders, public.order_items, public.reviews from authenticated;
 
 grant select on public.profiles to authenticated;
 grant select, insert, update, delete on public.products to authenticated;

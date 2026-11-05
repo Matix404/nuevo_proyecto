@@ -82,6 +82,7 @@ El esquema está versionado en `supabase/migrations/`:
 | `0001_core_schema.sql` | Tablas `profiles`, `products`, `orders`, `order_items`, `reviews` + constraints e índices |
 | `0002_products_category.sql` | Columna `products.category` + índice |
 | `0003_rls_policies.sql` | Policies por rol + `is_admin()` + grants |
+| `0004_create_order_rpc.sql` | RPC `create_order(items jsonb)`: precio y total calculados en el servidor |
 
 Para aplicar (no hay Supabase CLI linkeado): copiá cada archivo en orden en **Supabase → SQL Editor** y ejecutalo.
 
@@ -92,7 +93,15 @@ RLS está habilitado en las 5 tablas y `0003` cubre lo que la app hace hoy:
 - **admin**: todo lo anterior + crear/editar/eliminar productos, vía `public.is_admin()`.
 - **`profiles`**: cada uno lee solo el suyo. Nadie puede escribir la tabla desde la app, así que nadie puede auto-asignarse `admin`; los roles se asignan desde el dashboard.
 
-Pendiente de la Parte 4: `orders.total` y `order_items.price` todavía los manda el cliente. La RPC transaccional es lo que cierra ese agujero.
+La compra pasa por una sola función: `supabase.rpc('create_order', { items })`. El cliente manda **solo** `product_id` y `quantity`; los precios se leen de `products` y el total se calcula en el servidor, todo en una transacción. El insert directo de `orders`/`order_items` está revocado para `authenticated`, así que la RPC no es opcional.
+
+### Tests de base de datos
+
+```bash
+npm run test:db
+```
+
+Corre las migraciones sobre Postgres real (PGlite, WASM) y verifica RLS, grants, atomicidad de la compra y que el cliente no pueda inyectar precios.
 
 `0001_core_schema.sql` es un baseline de instalación limpia derivado del uso que hace el código, no un dump de producción. Reconciliá con tu base real antes de aplicarlo sobre datos existentes.
 

@@ -8,6 +8,10 @@
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint",
     "preview": "npm --prefix frontend run preview",
-    "setup": "npm --prefix frontend install"
+    "setup": "npm --prefix frontend install",
+    "test:db": "node supabase/tests/db.test.cjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15"
   }
 }
